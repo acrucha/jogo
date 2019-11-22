@@ -4,16 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "jogador.h"
-//#include "ServerRule.h"
 #include "server.h"
 #define MSG_MAX_SIZE 350
 #define BUFFER_SIZE (MSG_MAX_SIZE + 100)
 #define LOGIN_MAX_SIZE 13
 #define MAX_CLIENTS 4
-//Ainda falta criar acenario e as bibliotecas Jogador e Info_Inimigo Info_payer
-//Ainda falta a parte da diagonal
-//e parimoraar o jogo caso vcs queiram
-// e mais algumas coisas
+
 
 enum estado_do_server
 {
@@ -103,7 +99,6 @@ void testandoServidor(Jogador jogadores[], struct msg_ret_t recebido)
  printf("\nPosicao = [%d,%d]\nCoracao = %d\n Score = %d\n", jogadores[recebido.client_id].posX, jogadores[recebido.client_id].posY, jogadores[recebido.client_id].coracao, jogadores[recebido.client_id].score);
 }
 
-
 int main()
 {
  serverInit(MAX_CLIENTS);
@@ -116,14 +111,15 @@ int main()
  char skins[3];
  char estadodoserver = ESPERANDO;
  char qtd_players = 0;
+ int cont=0;
  puts("Server Pau no cu\n");
- while (1){
+ while (1)
+ {
  while (estadodoserver == ESPERANDO)
  {
- 
  int id = acceptConnection();
- //printf("%d",id);
- if (id == NO_CONNECTION){
+ if (id == NO_CONNECTION)
+ {
  //puts(id);
  }
  else
@@ -132,7 +128,7 @@ int main()
  if (qtd_players++ < MAX_CLIENTS)
  {
  recvMsgFromClient(nicknames[id], id, WAIT_FOR_IT);
- recvMsgFromClient(&skins[id], id, WAIT_FOR_IT);
+ //recvMsgFromClient(&skins[id], id, WAIT_FOR_IT);
  printf("%s se conectou com id = %d e escolheu o personagem %d \n qtd_players=%d\n", nicknames[id], id, skins[id], qtd_players);
  jogadores[id].estado = VACUO;
  jogadores[id].ID = id;
@@ -146,10 +142,11 @@ int main()
  if (MensagemRecebida.status == DISCONNECT_MSG)
  {
  --qtd_players;
+ if(players_connected == 0) estadodoserver = ENDGAME;
  printf("%s disconnected id: %d is free\n", nicknames[MensagemRecebida.client_id], MensagemRecebida.client_id);
  printf("players_connected: %d\n", qtd_players);
  }
- if (qtd_players == 0)
+ if (qtd_players == 1)
  {
  estadodoserver = EM_JOGO;
  broadcast(&estadodoserver, 1);
@@ -221,7 +218,6 @@ int main()
 
  broadcast((Jogador *)&jogadores[recebido.client_id], sizeof(Jogador));
  if (cenario[jogadores[recebido.client_id].posY + 1][jogadores[recebido.client_id].posX] == 0)
- ;
  {
  cair(cenario, jogadores, recebido, &Mudanca);
  }
@@ -280,17 +276,15 @@ int main()
  }
  }
  testandoServidor(jogadores, recebido);
- 
+ }
+ }
+ if(jogadores[recebido.client_id].posX==cenario[10][222]){
+ cont++;
+ if(cont==3){
+ ganhei(jogadores,cont);
  }
  }
  }
  puts("KITEI");
-
  return EXIT_SUCCESS;
 }
-/*else if(ret.status==DISCONNECT_MSG){
- --players_connected;
- printf("PLAYER(%d) DESCONECTOU\n",ret.client_id);
- if(players_connected == 0) serverState = ENDGAME;
- }
-*/
